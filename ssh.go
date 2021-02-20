@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net"
 	"os"
@@ -43,4 +44,21 @@ func connectToHost(user, hostaddr string) (*ssh.Client, *ssh.Session, error) {
 	}
 
 	return client, session, nil
+}
+
+func executeCommand(command, hostaddr string) (string, error) {
+	client, session, err := connectToHost(user, hostaddr)
+	if err != nil {
+		log.WithError(err).Error("error connecting to host")
+		return "", fmt.Errorf("error connecting to host %s: %w", hostaddr, err)
+	}
+	defer client.Close()
+
+	var stdout bytes.Buffer
+
+	session.Stdout = &stdout
+
+	err = session.Run(command)
+
+	return stdout.String(), err
 }

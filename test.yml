@@ -1,0 +1,10 @@
+---
+version: 1
+
+items:
+  - name: Ensure /root/foo exists
+    check: ls /root/foo
+    action: touch /root/foo
+  - name: Check Uptime
+    check: false
+    action: uptime

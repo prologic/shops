@@ -3,17 +3,21 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	flag "github.com/spf13/pflag"
+	"golang.org/x/crypto/ssh"
 )
 
 var (
 	debug   bool
 	version bool
 
-	file string
-	user string
+	file  string
+	user  string
+	port  int
+	quiet bool
 )
 
 func init() {
@@ -26,7 +30,9 @@ func init() {
 	flag.BoolVarP(&debug, "debug", "d", false, "enable debug logging")
 
 	flag.StringVarP(&file, "file", "f", "shops.yml", "configuration file")
-	flag.StringVarP(&user, "user", "u", "root", "default user to connect to")
+	flag.StringVarP(&user, "user", "u", "root", "default user to authenticate as")
+	flag.IntVarP(&port, "port", "p", 22, "default port to connect to remote host")
+	flag.BoolVarP(&quiet, "quiet", "q", false, "quiet operationg (no command output")
 }
 
 func main() {
@@ -49,18 +55,45 @@ func main() {
 		os.Exit(1)
 	}
 
-	hostaddr := flag.Arg(0)
-	client, session, err := connectToHost(user, hostaddr)
+	config, err := readConfig(file)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error connecting to host %s: %s", hostaddr, err)
+		fmt.Fprintf(os.Stderr, "error reading config %s: %s", file, err)
 		os.Exit(2)
 	}
-	defer client.Close()
 
-	out, err := session.CombinedOutput("uptime")
-	if err != nil {
-		log.WithError(err).Error("error running command")
-	} else {
-		fmt.Println(string(out))
+	for _, host := range flag.Args() {
+		hostaddr := parseHost(host, port)
+		fmt.Printf("%s:\n", hostaddr)
+
+		for _, item := range config.Items {
+			out, err := executeCommand(item.Check, hostaddr)
+			if err == nil {
+				if quiet {
+					fmt.Printf(" %s ✅\n", item)
+				} else {
+					fmt.Printf(" %s ✅ -> %s\n", item, strings.TrimSpace(out))
+				}
+				continue
+			}
+
+			if exitError, ok := err.(*ssh.ExitError); ok && exitError.ExitStatus() != 0 {
+				out, err := executeCommand(item.Action, hostaddr)
+				if err == nil {
+					if quiet {
+						fmt.Printf(" %s ✅\n", item)
+					} else {
+						fmt.Printf(" %s ✅ -> %s\n", item, strings.TrimSpace(out))
+					}
+					continue
+				}
+
+				if exitError, ok := err.(*ssh.ExitError); ok && exitError.ExitStatus() != 0 {
+					fmt.Printf("%s ERR (Status: %d Output: %s)\n", item, exitError.ExitStatus(), out)
+				}
+			} else {
+				log.WithError(err).Errorf("error running check %s against %s", item, hostaddr)
+				fmt.Printf("%s ERR (Status: %d Output: %s)\n", item, exitError.ExitStatus(), out)
+			}
+		}
 	}
 }

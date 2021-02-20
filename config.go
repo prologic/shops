@@ -11,7 +11,11 @@ import (
 type Item struct {
 	Name   string `yaml:"name"`
 	Check  string `yaml:"check"`
-	Action string `yaml"action"`
+	Action string `yaml:"action"`
+}
+
+func (i Item) String() string {
+	return i.Name
 }
 
 type Items []Item
@@ -19,7 +23,7 @@ type Items []Item
 type Config struct {
 	Version string `yaml:"version"`
 
-	Items Items `yaml"items"`
+	Items Items `yaml:"items"`
 }
 
 func readConfig(fn string) (config Config, err error) {
