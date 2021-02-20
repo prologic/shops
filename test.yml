@@ -1,6 +1,10 @@
 ---
 version: 1
 
+files:
+  - source: README.md
+    target: /root/README.md
+
 items:
   - name: Ensure /root/foo exists
     check: ls /root/foo

@@ -8,6 +8,16 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type File struct {
+	Source string `yaml:"source"`
+	Target string `yaml:"target"`
+	Mode   string `yaml:"mode"`
+}
+
+func (f File) String() string {
+	return fmt.Sprintf("%s:%s", f.Source, f.Target)
+}
+
 type Item struct {
 	Name   string `yaml:"name"`
 	Check  string `yaml:"check"`
@@ -18,11 +28,13 @@ func (i Item) String() string {
 	return i.Name
 }
 
+type Files []File
 type Items []Item
 
 type Config struct {
 	Version string `yaml:"version"`
 
+	Files Files `yaml:"files"`
 	Items Items `yaml:"items"`
 }
 

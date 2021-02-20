@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	scp "github.com/hnakamur/go-scp"
 	log "github.com/sirupsen/logrus"
 	flag "github.com/spf13/pflag"
 	"golang.org/x/crypto/ssh"
@@ -69,6 +70,27 @@ func main() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, " error connecting to host %s: %s\n", hostaddr, err)
 			continue
+		}
+
+		scpClient := scp.NewSCP(client)
+		for _, file := range config.Files {
+			fileInfo, err := os.Stat(file.Source)
+			if err != nil {
+				log.WithError(err).Error("error getting file info")
+				continue
+			}
+
+			if fileInfo.IsDir() {
+				err = scpClient.SendDir(file.Source, file.Target, nil)
+			} else {
+				err = scpClient.SendFile(file.Source, file.Target)
+			}
+
+			if err == nil {
+				fmt.Printf(" %s ✅\n", file)
+			} else {
+				fmt.Printf("%s ERR (%s)\n", file, err)
+			}
 		}
 
 		for _, item := range config.Items {
