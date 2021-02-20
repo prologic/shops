@@ -65,8 +65,14 @@ func main() {
 		hostaddr := parseHost(host, port)
 		fmt.Printf("%s:\n", hostaddr)
 
+		client, _, err := connectToHost(user, hostaddr)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, " error connecting to host %s: %s\n", hostaddr, err)
+			continue
+		}
+
 		for _, item := range config.Items {
-			out, err := executeCommand(item.Check, hostaddr)
+			out, err := executeCommand(item.Check, hostaddr, client)
 			if err == nil {
 				if quiet {
 					fmt.Printf(" %s ✅\n", item)
@@ -77,7 +83,7 @@ func main() {
 			}
 
 			if exitError, ok := err.(*ssh.ExitError); ok && exitError.ExitStatus() != 0 {
-				out, err := executeCommand(item.Action, hostaddr)
+				out, err := executeCommand(item.Action, hostaddr, client)
 				if err == nil {
 					if quiet {
 						fmt.Printf(" %s ✅\n", item)

@@ -46,13 +46,26 @@ func connectToHost(user, hostaddr string) (*ssh.Client, *ssh.Session, error) {
 	return client, session, nil
 }
 
-func executeCommand(command, hostaddr string) (string, error) {
-	client, session, err := connectToHost(user, hostaddr)
-	if err != nil {
-		log.WithError(err).Error("error connecting to host")
-		return "", fmt.Errorf("error connecting to host %s: %w", hostaddr, err)
+func executeCommand(command, hostaddr string, client *ssh.Client) (string, error) {
+	var (
+		err     error
+		session *ssh.Session
+	)
+
+	if client == nil {
+		client, session, err = connectToHost(user, hostaddr)
+		if err != nil {
+			log.WithError(err).Error("error connecting to host")
+			return "", fmt.Errorf("error connecting to host %s: %w", hostaddr, err)
+		}
+		defer client.Close()
+	} else {
+		session, err = client.NewSession()
+		if err != nil {
+			log.WithError(err).Error("error creating new session to host")
+			return "", fmt.Errorf("error creating new session to host %s: %w", hostaddr, err)
+		}
 	}
-	defer client.Close()
 
 	var stdout bytes.Buffer
 
