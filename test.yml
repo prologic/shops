@@ -5,6 +5,9 @@ items:
   - name: Ensure /root/foo exists
     check: ls /root/foo
     action: touch /root/foo
+  - name: Ensure sshbox is running
+    check: ps aux | grep sshbox
+    action: nohup  sshbox -g /dev/null 'box run alpine /bin/sh' &> /root/sshbox.log &
   - name: Check Uptime
     check: false
     action: uptime

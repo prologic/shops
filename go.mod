@@ -1,4 +1,4 @@
-module github.com/prologic/shops
+module git.mills.io/prologic/shops
 
 go 1.15
 
