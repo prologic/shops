@@ -47,6 +47,16 @@ Will perform the will perform the following:
 - Ensure `/tmp/foo` exists
 - Check the uptime of the server and display it.
 
+Example:
+
+```#!console
+$ ./shops -f test.yml 10.0.0.50:22
+10.0.0.50:22:
+ Ensure /root/foo exists ✅ -> /root/foo
+ Ensure sshbox is running ✅ ->
+ Check Uptime ✅ -> 04:01:12 up 19 days,  2:18,  0 users,  load average: 0.00, 0.00, 0.00
+```
+
 ## Configuration Specification
 
 Currently the configuration specification is a simple YAML file that consists
