@@ -1,9 +1,9 @@
 # shops - Shell Operations
 
 `shops` is a simple command-line tool written in [Go](https://golang.org)
-that helpsyou simplify the way you manage configuration across a set of
-machines. shops is your configuration management tool of choice when Chef,
-Puppet, Ansbile are all too complicated and all you really want to do is
+that helps you simplify the way you manage configuration across a set of
+machines. `shops` is your configuration management tool of choice when Chef,
+Puppet, Ansible are all too complicated and all you really want to do is
 run a bunch of regular shell against a set of hosts.
 
 ## Getting Started
@@ -70,7 +70,7 @@ of a number of top-level keys:
 - `items` -- One or more items of configuration to be applied to each target
   host. Each item declares a "check" and "action". Checks and actions are
   written in regular shell. If a check fails, the action is run to correct the
-  failred state. If all checks pass, no actions are run.
+  failed state. If all checks pass, no actions are run.
 
 ## License
 
