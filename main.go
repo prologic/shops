@@ -50,7 +50,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	if flag.NArg() != 1 {
+	if flag.NArg() == 0 {
 		fmt.Fprintf(os.Stderr, "Error: must supply one or more hosts or `-` to read hosts from stdin")
 		flag.Usage()
 		os.Exit(1)
@@ -89,7 +89,7 @@ func main() {
 			if err == nil {
 				fmt.Printf(" %s ✅\n", file)
 			} else {
-				fmt.Printf("%s ERR (%s)\n", file, err)
+				fmt.Printf(" %s ERR (%s)\n", file, err)
 			}
 		}
 
@@ -116,11 +116,11 @@ func main() {
 				}
 
 				if exitError, ok := err.(*ssh.ExitError); ok && exitError.ExitStatus() != 0 {
-					fmt.Printf("%s ERR (Status: %d Output: %s)\n", item, exitError.ExitStatus(), out)
+					fmt.Printf(" %s ERR (Status: %d Output: %s)\n", item, exitError.ExitStatus(), out)
 				}
 			} else {
 				log.WithError(err).Errorf("error running check %s against %s", item, hostaddr)
-				fmt.Printf("%s ERR (Status: %d Output: %s)\n", item, exitError.ExitStatus(), out)
+				fmt.Printf(" %s ERR (Status: %d Output: %s)\n", item, exitError.ExitStatus(), out)
 			}
 		}
 	}
