@@ -1,0 +1,7 @@
+---
+version: 1
+
+items:
+  - name: Check if running latest Docker engine
+    check: sudo ros engine list | tail -n 1 | grep enabled
+    action: /bin/false
