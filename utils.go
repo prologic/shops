@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"regexp"
 )
 
@@ -15,4 +17,26 @@ func parseHost(host string, port int) string {
 	}
 
 	return hostaddr
+}
+
+func parseHosts(hosts []string, port int) []string {
+	var addrs []string
+
+	for _, host := range hosts {
+		addrs = append(addrs, parseHost(host, port))
+	}
+
+	return addrs
+}
+
+func readLines(r io.Reader) (lines []string, err error) {
+	scanner := bufio.NewScanner(r)
+
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+
+	err = scanner.Err()
+
+	return
 }

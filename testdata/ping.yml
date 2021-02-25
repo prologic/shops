@@ -1,0 +1,8 @@
+---
+veersion: 1
+
+items:
+  - name: Check if server is alive?
+    check: /bin/true
+    action: |
+      echo "$HOSTNAME dead or /bin/true not found"
