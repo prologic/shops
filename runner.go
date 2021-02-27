@@ -275,5 +275,4 @@ func (run *GroupRunner) Run() {
 	}
 
 	wg.Wait()
-	close(results)
 }
