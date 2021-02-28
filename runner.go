@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -227,24 +226,7 @@ func NewGroupRunner(addrs []string, conf Config, user string, debug bool) *Group
 func (run *GroupRunner) Run() {
 	var wg sync.WaitGroup
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	results := make(chan *HostResult)
-
-	go func() {
-		for {
-			select {
-			case res, ok := <-results:
-				if !ok {
-					return
-				}
-				fmt.Printf("%s\n", res)
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
 
 	for _, addr := range run.Addrs {
 		runner := NewHostRunner(addr, run.Conf, run.User)
@@ -274,5 +256,12 @@ func (run *GroupRunner) Run() {
 		}
 	}
 
-	wg.Wait()
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	for res := range results {
+		fmt.Printf("%s\n", res)
+	}
 }
