@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	log "github.com/sirupsen/logrus"
 	flag "github.com/spf13/pflag"
@@ -57,7 +58,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	var addrs []string
+	var uris []URI
 
 	if flag.NArg() == 1 && flag.Arg(0) == "-" {
 		lines, err := readLines(os.Stdin)
@@ -65,11 +66,11 @@ func main() {
 			fmt.Fprintf(os.Stderr, "error reading hosts: %s", err)
 			os.Exit(2)
 		}
-		addrs = parseHosts(lines, port)
+		uris = ParseURIs(lines, user, strconv.Itoa(port))
 	} else {
-		addrs = parseHosts(flag.Args(), port)
+		uris = ParseURIs(flag.Args(), user, strconv.Itoa(port))
 	}
 
-	NewGroupRunner(addrs, config, user, debug).Run()
+	NewGroupRunner(uris, config).Run()
 	Pony()
 }

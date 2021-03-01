@@ -118,7 +118,12 @@ func (res *HostResult) String() string {
 	return sb.String()
 }
 
-type HostRunner struct {
+type Runner interface {
+	Run() error
+	Result() *HostResult
+}
+
+type SSHRunner struct {
 	Addr string
 	Conf Config
 	User string
@@ -126,17 +131,17 @@ type HostRunner struct {
 	res *HostResult
 }
 
-func NewHostRunner(addr string, conf Config, user string) *HostRunner {
-	runner := &HostRunner{Addr: addr, Conf: conf, User: user}
+func NewSSHRunner(addr string, conf Config, user string) *SSHRunner {
+	runner := &SSHRunner{Addr: addr, Conf: conf, User: user}
 	runner.res = &HostResult{Addr: addr}
 	return runner
 }
 
-func (run *HostRunner) Result() *HostResult {
+func (run *SSHRunner) Result() *HostResult {
 	return run.res
 }
 
-func (run *HostRunner) Run() error {
+func (run *SSHRunner) Run() error {
 	failed := func(err error) error {
 		run.res.err = err
 		return err
@@ -165,7 +170,7 @@ func (run *HostRunner) Run() error {
 	}
 
 	for _, item := range run.Conf.Items {
-		out, err := executeCommand(item.Check, run.Addr, client)
+		out, err := executeRemoteCommand(item.Check, run.Addr, client)
 		if err == nil {
 			run.res.Items = append(run.res.Items, ItemResult{
 				err:    err,
@@ -177,7 +182,7 @@ func (run *HostRunner) Run() error {
 		}
 
 		if exitError, ok := err.(*ssh.ExitError); ok && exitError.ExitStatus() != 0 {
-			out, err := executeCommand(item.Action, run.Addr, client)
+			out, err := executeRemoteCommand(item.Action, run.Addr, client)
 			if err == nil {
 				run.res.Items = append(run.res.Items, ItemResult{
 					err:    err,
@@ -211,16 +216,93 @@ func (run *HostRunner) Run() error {
 	return nil
 }
 
-type GroupRunner struct {
-	Addrs []string
-	Conf  Config
-	User  string
+type LocalRunner struct {
+	Conf Config
 
-	Debug bool
+	res *HostResult
 }
 
-func NewGroupRunner(addrs []string, conf Config, user string, debug bool) *GroupRunner {
-	return &GroupRunner{Addrs: addrs, Conf: conf, User: user, Debug: debug}
+func NewLocalRunner(conf Config) *LocalRunner {
+	runner := &LocalRunner{Conf: conf}
+	runner.res = &HostResult{Addr: "local://"}
+	return runner
+}
+
+func (run *LocalRunner) Result() *HostResult {
+	return run.res
+}
+
+func (run *LocalRunner) Run() error {
+	for _, file := range run.Conf.Files {
+		fileInfo, err := os.Stat(file.Source)
+		if err != nil {
+			run.res.Files = append(run.res.Files, FileResult{err: err, Source: file.Source, Target: file.Target})
+			continue
+		}
+
+		if fileInfo.IsDir() {
+			err = CopyDirectory(file.Source, file.Target)
+		} else {
+			_, err = CopyFile(file.Source, file.Target)
+		}
+
+		run.res.Files = append(run.res.Files, FileResult{err: err, Source: file.Source, Target: file.Target})
+	}
+
+	for _, item := range run.Conf.Items {
+		out, err := executeLocalCommand(item.Check)
+		if err == nil {
+			run.res.Items = append(run.res.Items, ItemResult{
+				err:    err,
+				Name:   item.Name,
+				Check:  true,
+				Output: strings.TrimSpace(out),
+			})
+			continue
+		}
+
+		if exitError, ok := err.(*ssh.ExitError); ok && exitError.ExitStatus() != 0 {
+			out, err := executeLocalCommand(item.Action)
+			if err == nil {
+				run.res.Items = append(run.res.Items, ItemResult{
+					err:    err,
+					Name:   item.Name,
+					Action: true,
+					Output: strings.TrimSpace(out),
+				})
+				continue
+			}
+
+			if exitError, ok := err.(ExitError); ok && exitError.ExitStatus() != 0 {
+				out += fmt.Sprintf("\nExit status: %d\n", exitError.ExitStatus())
+				run.res.Items = append(run.res.Items, ItemResult{
+					err:    err,
+					Name:   item.Name,
+					Action: false,
+					Output: strings.TrimSpace(out),
+				})
+			}
+		} else {
+			log.WithError(err).Errorf("error running check %s against local://", item)
+			out += fmt.Sprintf("\nExit status: %d\n", exitError.ExitStatus())
+			run.res.Items = append(run.res.Items, ItemResult{
+				err:    err,
+				Name:   item.Name,
+				Output: strings.TrimSpace(out),
+			})
+		}
+	}
+
+	return nil
+}
+
+type GroupRunner struct {
+	URIs []URI
+	Conf Config
+}
+
+func NewGroupRunner(uris []URI, conf Config) *GroupRunner {
+	return &GroupRunner{URIs: uris, Conf: conf}
 }
 
 func (run *GroupRunner) Run() {
@@ -228,32 +310,29 @@ func (run *GroupRunner) Run() {
 
 	results := make(chan *HostResult)
 
-	for _, addr := range run.Addrs {
-		runner := NewHostRunner(addr, run.Conf, run.User)
-		if debug {
-			log.Debugf("created runner for %s", addr)
+	for _, u := range run.URIs {
+		var runner Runner
+
+		switch u.Type {
+		case "local":
+			runner = NewLocalRunner(run.Conf)
+		case "ssh":
+			runner = NewSSHRunner(u.HostAddr(), run.Conf, u.User)
+		default:
+			log.WithField("uri", u).Warn("invalid uri")
+			continue
 		}
 
 		wg.Add(1)
-		go func(runner *HostRunner) {
+		go func(runner Runner) {
 			defer wg.Done()
 
-			if debug {
-				log.Debugf("running runner for %s", runner.Addr)
-			}
 			if err := runner.Run(); err != nil {
 				log.WithError(err).Error("error running host")
 			} else {
-				res := runner.Result()
-				if debug {
-					log.Debugf("result for %s: %s", runner.Addr, res)
-				}
-				results <- res
+				results <- runner.Result()
 			}
 		}(runner)
-		if debug {
-			log.Debugf("started runner for %s", runner.Addr)
-		}
 	}
 
 	go func() {
