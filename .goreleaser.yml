@@ -2,11 +2,10 @@
 builds:
   -
     flags: -tags "static_build"
-    ldflags: -w -X github.com/prologic/tube/.Version={{.Version}} -X github.com/prologic/tube/.Commit={{.Commit}}
+    ldflags: -w -X github.com/prologic/shops/.Version={{.Version}} -X github.com/prologic/shops/.Commit={{.Commit}}
     env:
       - CGO_ENABLED=0
     goos:
-      - windows
       - freebsd
       - darwin
       - linux
@@ -18,33 +17,14 @@ brews:
   -
     github:
       owner: prologic
-      name: homebrew-tube
-    homepage: "https://github.io/prologic/tube"
+      name: homebrew-shops
+    homepage: "https://github.io/prologic/shops"
     description: |
-      tube is a Youtube-like (without censorship and features you don't need!)
-      Video Sharing App written in Go which also supports automatic
-      transcoding to MP4 H.265 AAC, multiple collections and RSS feed.
-    dependencies:
-      - ffmpeg
-    plist: |
-      <?xml version=‘1.0’ encoding=‘UTF-8’?>
-      <!DOCTYPE plist PUBLIC \“-//Apple Computer//DTD PLIST 1.0//EN\” \”http://www.apple.com/DTDs/PropertyList-1.0.dtd\” >
-      <plist version=‘1.0’>
-      <dict>
-      <key>Label</key><string>Tube</string>
-      <key>ProgramArguments</key>
-      <array>
-        <string>/usr/local/bin/tube</string>
-        <string>/usr/local/etc/tube/config.json
-      </array>
-      <key>WorkingDirectory</key>
-      <string>/usr/local</string>
-      <key>StandardOutPath</key><string>/usr/local/log/tube.log</string>
-      <key>RunAtLoad</key></true/>
-      <key>KeepAlive</key><true/>
-      <key>Disabled</key><false/>
-      </dict>
-      </plist>
+      shops is a simple command-line tool written in Go that helps you
+      simplify the way you manage configuration across a set of machines.
+      shops is your configuration management tool of choice when Chef, Puppet,
+      Ansible are all too complicated and all you really want to do is run a
+      bunch of regular shell against a set of hosts.
 signs:
   -
     artifacts: checksum
@@ -53,7 +33,6 @@ archives:
     replacements:
       darwin: Darwin
       linux: Linux
-      windows: Windows
       386: i386
       amd64: x86_64
 checksum:
