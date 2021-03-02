@@ -1,5 +1,15 @@
 # shops - Shell Operations
 
+![GitHub All Releases](https://img.shields.io/github/downloads/prologic/shops/total)
+
+![](https://github.com/prologic/shops/workflows/Go/badge.svg)
+![](https://github.com/prologic/shops/workflows/ReviewDog/badge.svg)
+
+[![Go Report Card](https://goreportcard.com/badge/prologic/shops)](https://goreportcard.com/report/prologic/shops)
+[![codebeat badge](https://codebeat.co/badges/15fba8a5-3044-4f40-936f-9e0f5d5d1fd9)](https://codebeat.co/projects/github-com-prologic-shops-master)
+[![GoDoc](https://godoc.org/github.com/prologic/shops?status.svg)](https://godoc.org/github.com/prologic/shops)
+[![GitHub license](https://img.shields.io/github/license/prologic/shops.svg)](https://github.com/prologic/shops)
+
 `shops` is a simple command-line tool written in [Go](https://golang.org)
 that helps you simplify the way you manage configuration across a set of
 machines. `shops` is your configuration management tool of choice when Chef,
