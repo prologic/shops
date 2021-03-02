@@ -13,6 +13,7 @@ var (
 	debug   bool
 	version bool
 
+	cont bool
 	file string
 	user string
 	port int
@@ -30,6 +31,7 @@ func init() {
 	flag.StringVarP(&file, "file", "f", "shops.yml", "configuration file")
 	flag.StringVarP(&user, "user", "u", "root", "default user to authenticate as")
 	flag.IntVarP(&port, "port", "p", 22, "default port to connect to remote host")
+	flag.BoolVarP(&cont, "continue-on-error", "c", false, "continue on errors")
 }
 
 func main() {
@@ -71,6 +73,13 @@ func main() {
 		uris = ParseURIs(flag.Args(), user, strconv.Itoa(port))
 	}
 
-	NewGroupRunner(uris, config).Run()
+	runner, err := NewGroupRunner(uris, config)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error creating runner: %s", err)
+		os.Exit(2)
+	}
+
+	runner.Run()
+
 	Pony()
 }

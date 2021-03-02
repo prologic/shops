@@ -127,12 +127,13 @@ type SSHRunner struct {
 	Addr string
 	Conf Config
 	User string
+	Opts Options
 
 	res *HostResult
 }
 
-func NewSSHRunner(addr string, conf Config, user string) *SSHRunner {
-	runner := &SSHRunner{Addr: addr, Conf: conf, User: user}
+func NewSSHRunner(addr string, conf Config, user string, opts Options) *SSHRunner {
+	runner := &SSHRunner{Addr: addr, Conf: conf, User: user, Opts: opts}
 	runner.res = &HostResult{Addr: addr}
 	return runner
 }
@@ -157,7 +158,11 @@ func (run *SSHRunner) Run() error {
 		fileInfo, err := os.Stat(file.Source)
 		if err != nil {
 			run.res.Files = append(run.res.Files, FileResult{err: err, Source: file.Source, Target: file.Target})
-			continue
+			if run.Opts.ContinueOnError {
+				continue
+			} else {
+				return failed(fmt.Errorf("error copying files (aborting)"))
+			}
 		}
 
 		if fileInfo.IsDir() {
@@ -167,6 +172,9 @@ func (run *SSHRunner) Run() error {
 		}
 
 		run.res.Files = append(run.res.Files, FileResult{err: err, Source: file.Source, Target: file.Target})
+		if !run.Opts.ContinueOnError {
+			return failed(fmt.Errorf("error copying files (aborting)"))
+		}
 	}
 
 	for _, item := range run.Conf.Items {
@@ -201,6 +209,9 @@ func (run *SSHRunner) Run() error {
 					Action: false,
 					Output: strings.TrimSpace(out),
 				})
+				if !run.Opts.ContinueOnError {
+					return failed(fmt.Errorf("error running item (aborting)"))
+				}
 			}
 		} else {
 			log.WithError(err).Errorf("error running check %s against %s", item, run.Addr)
@@ -218,12 +229,13 @@ func (run *SSHRunner) Run() error {
 
 type LocalRunner struct {
 	Conf Config
+	Opts Options
 
 	res *HostResult
 }
 
-func NewLocalRunner(conf Config) *LocalRunner {
-	runner := &LocalRunner{Conf: conf}
+func NewLocalRunner(conf Config, opts Options) *LocalRunner {
+	runner := &LocalRunner{Conf: conf, Opts: opts}
 	runner.res = &HostResult{Addr: "local://"}
 	return runner
 }
@@ -233,11 +245,20 @@ func (run *LocalRunner) Result() *HostResult {
 }
 
 func (run *LocalRunner) Run() error {
+	failed := func(err error) error {
+		run.res.err = err
+		return err
+	}
+
 	for _, file := range run.Conf.Files {
 		fileInfo, err := os.Stat(file.Source)
 		if err != nil {
 			run.res.Files = append(run.res.Files, FileResult{err: err, Source: file.Source, Target: file.Target})
-			continue
+			if run.Opts.ContinueOnError {
+				continue
+			} else {
+				return failed(fmt.Errorf("error copying files (aborting)"))
+			}
 		}
 
 		if fileInfo.IsDir() {
@@ -247,6 +268,9 @@ func (run *LocalRunner) Run() error {
 		}
 
 		run.res.Files = append(run.res.Files, FileResult{err: err, Source: file.Source, Target: file.Target})
+		if !run.Opts.ContinueOnError {
+			return failed(fmt.Errorf("error copying files (aborting)"))
+		}
 	}
 
 	for _, item := range run.Conf.Items {
@@ -281,6 +305,9 @@ func (run *LocalRunner) Run() error {
 					Action: false,
 					Output: strings.TrimSpace(out),
 				})
+				if !run.Opts.ContinueOnError {
+					return failed(fmt.Errorf("error running item (aborting)"))
+				}
 			}
 		} else {
 			log.WithError(err).Errorf("error running check %s against local://", item)
@@ -299,10 +326,19 @@ func (run *LocalRunner) Run() error {
 type GroupRunner struct {
 	URIs []URI
 	Conf Config
+	Opts Options
 }
 
-func NewGroupRunner(uris []URI, conf Config) *GroupRunner {
-	return &GroupRunner{URIs: uris, Conf: conf}
+func NewGroupRunner(uris []URI, conf Config, opts ...Option) (*GroupRunner, error) {
+	options := NewOptions()
+	for _, opt := range opts {
+		if err := opt(options); err != nil {
+			log.WithError(err).Error("error configuring runner")
+			return nil, err
+		}
+	}
+
+	return &GroupRunner{URIs: uris, Conf: conf, Opts: *options}, nil
 }
 
 func (run *GroupRunner) Run() {
@@ -315,9 +351,9 @@ func (run *GroupRunner) Run() {
 
 		switch u.Type {
 		case "local":
-			runner = NewLocalRunner(run.Conf)
+			runner = NewLocalRunner(run.Conf, run.Opts)
 		case "ssh":
-			runner = NewSSHRunner(u.HostAddr(), run.Conf, u.User)
+			runner = NewSSHRunner(u.HostAddr(), run.Conf, u.User, run.Opts)
 		default:
 			log.WithField("uri", u).Warn("invalid uri")
 			continue
