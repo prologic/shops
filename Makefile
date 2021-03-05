@@ -12,8 +12,8 @@ dev: build
 build: clean
 	@go build \
 		-tags "netgo static_build" -installsuffix netgo 	\
-		-ldflags "-w -X $(shell go list).Version=$(VERSION) \
-					 -X $(shell go list).Commit=$(COMMIT)"	\
+		-ldflags "-w -X main.Version=$(VERSION) \
+					 -X main.Commit=$(COMMIT)"	\
 		.
 
 install: build
