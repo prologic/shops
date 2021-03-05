@@ -19,9 +19,26 @@ var (
 	port int
 )
 
+const helpText = `
+shops runs a spec against one or more targets, targets can be provided as
+arguments or read from standard input by supplying a single argument "-".
+
+The syntax targets are:
+
+<type>://[<user>@]<hostname>[:<port>]
+
+For local targets, only the type is required. e.g: local://
+
+For remote (ssh://) targets, if either the user or port is not provided as
+part of the target, it defaults to the -u/--user and -p/--port options.
+
+Valid options:
+`
+
 func init() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [options] [ - | host... ]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s [options] [ TARGET [ TARGET ] ... ]\n", os.Args[0])
+		fmt.Fprint(os.Stderr, helpText)
 		flag.PrintDefaults()
 	}
 
