@@ -31,6 +31,10 @@ For local targets, only thee type is required, e.g: `local://`.
 For remote targets, the user and port are optional and if not specified in the
 target they default to the `-u/--user` and `-p/--port` flags respectively.
 
+Help me grow this project and give it a star!
+
+<a class="github-button" href="https://github.com/prologic/shops" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star prologic/shops on GitHub">Star</a>
+
 ## Getting Started
 
 ### Install from releases
