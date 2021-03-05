@@ -33,4 +33,11 @@ func TestParseeURI(t *testing.T) {
 		assert.Equal("22", u.Port)
 	})
 
+	t.Run("ssh://192.168.0.1:2222", func(t *testing.T) {
+		u := ParseURI("ssh://192.168.0.1:2222", "root", "22")
+		assert.Equal("ssh", u.Type)
+		assert.Equal("root", u.User)
+		assert.Equal("192.168.0.1", u.Host)
+		assert.Equal("2222", u.Port)
+	})
 }
