@@ -168,7 +168,7 @@ func (run *SSHRunner) Run() error {
 			if run.Opts.ContinueOnError {
 				continue
 			} else {
-				return failed(fmt.Errorf("error copying files (aborting)"))
+				return failed(fmt.Errorf("error copying files (aborting): %w", err))
 			}
 		}
 
@@ -179,8 +179,8 @@ func (run *SSHRunner) Run() error {
 		}
 
 		run.res.Files = append(run.res.Files, FileResult{err: err, Source: file.Source, Target: file.Target})
-		if !run.Opts.ContinueOnError {
-			return failed(fmt.Errorf("error copying files (aborting)"))
+		if err != nil && !run.Opts.ContinueOnError {
+			return failed(fmt.Errorf("error copying files (aborting): %w", err))
 		}
 	}
 
@@ -281,7 +281,7 @@ func (run *LocalRunner) Run() error {
 			if run.Opts.ContinueOnError {
 				continue
 			} else {
-				return failed(fmt.Errorf("error copying files (aborting)"))
+				return failed(fmt.Errorf("error copying files (aborting): %w", err))
 			}
 		}
 
@@ -292,8 +292,8 @@ func (run *LocalRunner) Run() error {
 		}
 
 		run.res.Files = append(run.res.Files, FileResult{err: err, Source: file.Source, Target: file.Target})
-		if !run.Opts.ContinueOnError {
-			return failed(fmt.Errorf("error copying files (aborting)"))
+		if err != nil && !run.Opts.ContinueOnError {
+			return failed(fmt.Errorf("error copying files (aborting): %w", err))
 		}
 	}
 
