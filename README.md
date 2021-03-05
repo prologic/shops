@@ -103,10 +103,21 @@ Example:
 ```#!console
 $ ./shops -f ./testdata/sample.yml 10.0.0.50
 10.0.0.50:22:
- Ensure /root/foo exists ✅ -> /root/foo
- Ensure sshbox is running ✅ ->
- Check Uptime ✅ -> 04:01:12 up 19 days,  2:18,  0 users,  load average: 0.00, 0.00, 0.00
+  README.md -> /root/README.md ✅
+  Ensure /root/foo exists ✅ -> /root/foo
+  Ensure sshbox is running ✅ ->
+  Check Uptime ✅ -> 13:58:27 up 3 days,  1:38,  0 users,  load average: 0.00, 0.00, 0.00
+
+
+           ,--,
+     _ ___/ /\|
+ ,;'( )__, )  ~
+//  //   '--;
+'   \     | ^
+     ^    ^
 ```
+
+> Yes, it really does print a Pony on success! 🤣
 
 ## Specification File Format
 
