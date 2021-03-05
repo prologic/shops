@@ -8,5 +8,5 @@ funcs:
 
 items:
   - name: Print "Hello World"
-    check: true
+    check: false
     action: hello

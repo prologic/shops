@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"strings"
 	"text/template"
-
-	log "github.com/sirupsen/logrus"
 )
 
 const cmdTmpl = `
@@ -42,8 +40,5 @@ func renderString(tpl string, ctx Context) (string, error) {
 		return "", err
 	}
 
-	val := buf.String()
-	log.Debugf("val: %s", val)
-
-	return val, nil
+	return buf.String(), nil
 }

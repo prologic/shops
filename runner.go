@@ -8,7 +8,6 @@ import (
 
 	scp "github.com/hnakamur/go-scp"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/crypto/ssh"
 )
 
 type FileResult struct {
@@ -202,7 +201,7 @@ func (run *SSHRunner) Run() error {
 			continue
 		}
 
-		if exitError, ok := err.(*ssh.ExitError); ok && exitError.ExitStatus() != 0 {
+		if err.(ExitError).ExitStatus() != 0 {
 			cmd, err := renderString(cmdTmpl, run.Context(item.Action))
 			if err != nil {
 				return failed(fmt.Errorf("error rendering command (aborting)"))
@@ -219,8 +218,8 @@ func (run *SSHRunner) Run() error {
 				continue
 			}
 
-			if exitError, ok := err.(*ssh.ExitError); ok && exitError.ExitStatus() != 0 {
-				out += fmt.Sprintf("\nExit status: %d\n", exitError.ExitStatus())
+			if err.(ExitError).ExitStatus() != 0 {
+				out += fmt.Sprintf("\nExit status: %d\n", err.(ExitError).ExitStatus())
 				run.res.Items = append(run.res.Items, ItemResult{
 					err:    err,
 					Name:   item.Name,
@@ -233,7 +232,7 @@ func (run *SSHRunner) Run() error {
 			}
 		} else {
 			log.WithError(err).Errorf("error running check %s against %s", item, run.Addr)
-			out += fmt.Sprintf("\nExit status: %d\n", exitError.ExitStatus())
+			out += fmt.Sprintf("\nExit status: %d\n", err.(ExitError).ExitStatus())
 			run.res.Items = append(run.res.Items, ItemResult{
 				err:    err,
 				Name:   item.Name,
@@ -315,7 +314,7 @@ func (run *LocalRunner) Run() error {
 			continue
 		}
 
-		if exitError, ok := err.(*ssh.ExitError); ok && exitError.ExitStatus() != 0 {
+		if err.(ExitError).ExitStatus() != 0 {
 			cmd, err := renderString(cmdTmpl, run.Context(item.Action))
 			if err != nil {
 				return failed(fmt.Errorf("error rendering command (aborting)"))
@@ -332,8 +331,8 @@ func (run *LocalRunner) Run() error {
 				continue
 			}
 
-			if exitError, ok := err.(ExitError); ok && exitError.ExitStatus() != 0 {
-				out += fmt.Sprintf("\nExit status: %d\n", exitError.ExitStatus())
+			if err.(ExitError).ExitStatus() != 0 {
+				out += fmt.Sprintf("\nExit status: %d\n", err.(ExitError).ExitStatus())
 				run.res.Items = append(run.res.Items, ItemResult{
 					err:    err,
 					Name:   item.Name,
@@ -346,7 +345,7 @@ func (run *LocalRunner) Run() error {
 			}
 		} else {
 			log.WithError(err).Errorf("error running check %s against local://", item)
-			out += fmt.Sprintf("\nExit status: %d\n", exitError.ExitStatus())
+			out += fmt.Sprintf("\nExit status: %d\n", err.(ExitError).ExitStatus())
 			run.res.Items = append(run.res.Items, ItemResult{
 				err:    err,
 				Name:   item.Name,
