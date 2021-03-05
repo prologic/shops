@@ -42,12 +42,12 @@ func init() {
 		flag.PrintDefaults()
 	}
 
-	flag.BoolVarP(&version, "version", "v", false, "display version information")
+	flag.BoolVarP(&version, "version", "v", false, "display version information and exit")
 	flag.BoolVarP(&debug, "debug", "d", false, "enable debug logging")
 
-	flag.StringVarP(&file, "file", "f", "shops.yml", "configuration file")
-	flag.StringVarP(&user, "user", "u", "root", "default user to authenticate as")
-	flag.IntVarP(&port, "port", "p", 22, "default port to connect to remote host")
+	flag.StringVarP(&file, "file", "f", "shops.yml", "spec file")
+	flag.StringVarP(&user, "user", "u", "root", "default user for temotee targets")
+	flag.IntVarP(&port, "port", "p", 22, "default port for remote targets")
 	flag.BoolVarP(&cont, "continue-on-error", "c", false, "continue on errors")
 }
 
