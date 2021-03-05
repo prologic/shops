@@ -71,9 +71,14 @@ func executeRemoteCommand(command, hostaddr string, client *ssh.Client) (string,
 
 	session.Stdout = &stdout
 
-	if err = session.Run(command); err != nil {
-		err = exitStatus{err: err, status: err.(*ssh.ExitError).ExitStatus()}
+	var exitError error
+
+	if runErr := session.Run(command); runErr != nil {
+		exitError = exitStatus{
+			err:    err,
+			status: runErr.(*ssh.ExitError).ExitStatus(),
+		}
 	}
 
-	return stdout.String(), err
+	return stdout.String(), exitError
 }

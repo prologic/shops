@@ -10,7 +10,7 @@ const cmdTmpl = `
 set -e
 {{ range $key, $val := .Funcs }}
 {{ $key }}() {
-{{ $val | indent 2 }}
+{{ $val | trim | indent 2 }}
 }
 {{ end }}
 {{ .Command }}
@@ -21,6 +21,10 @@ type Context struct {
 	Command string
 }
 
+func trim(v string) string {
+	return strings.TrimSpace(v)
+}
+
 func indent(spaces int, v string) string {
 	pad := strings.Repeat(" ", spaces)
 	return pad + strings.Replace(v, "\n", "\n"+pad, -1)
@@ -29,6 +33,7 @@ func indent(spaces int, v string) string {
 func renderString(tpl string, ctx Context) (string, error) {
 	funcMap := map[string]interface{}{
 		"indent": indent,
+		"trim":   trim,
 	}
 
 	t := template.New("tpl")

@@ -17,11 +17,14 @@ func executeLocalCommand(command string) (string, error) {
 		return "", err
 	}
 
-	var err error
+	var exitError error
 
-	if err := cmd.Wait(); err != nil {
-		err = exitStatus{err: err, status: err.(*exec.ExitError).Sys().(syscall.WaitStatus).ExitStatus()}
+	if waitErr := cmd.Wait(); waitErr != nil {
+		exitError = exitStatus{
+			err:    waitErr,
+			status: waitErr.(*exec.ExitError).Sys().(syscall.WaitStatus).ExitStatus(),
+		}
 	}
 
-	return buf.String(), err
+	return buf.String(), exitError
 }

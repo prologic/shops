@@ -302,8 +302,10 @@ func (run *LocalRunner) Run() error {
 		if err != nil {
 			return failed(fmt.Errorf("error rendering command (aborting)"))
 		}
+		log.Debugf("%s executing:%s", run.res.Addr, cmd)
 
 		out, err := executeLocalCommand(cmd)
+		log.Debugf("out: %#v err: %#v", out, err)
 		if err == nil {
 			run.res.Items = append(run.res.Items, ItemResult{
 				err:    err,
@@ -319,9 +321,11 @@ func (run *LocalRunner) Run() error {
 			if err != nil {
 				return failed(fmt.Errorf("error rendering command (aborting)"))
 			}
+			log.Debugf("%s executing:%s", run.res.Addr, cmd)
 
 			out, err := executeLocalCommand(cmd)
 			if err == nil {
+				log.Debugf("output: #%v", out)
 				run.res.Items = append(run.res.Items, ItemResult{
 					err:    err,
 					Name:   item.Name,

@@ -9,4 +9,4 @@ funcs:
 items:
   - name: Print "Hello World"
     check: false
-    action: hello
+    action: hello "World"
