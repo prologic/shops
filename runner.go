@@ -120,6 +120,7 @@ func (res *HostResult) String() string {
 
 type Runner interface {
 	Run() error
+	Context(cmd string) Context
 	Result() *HostResult
 }
 
@@ -140,6 +141,13 @@ func NewSSHRunner(addr string, conf Config, user string, opts Options) *SSHRunne
 
 func (run *SSHRunner) Result() *HostResult {
 	return run.res
+}
+
+func (run *SSHRunner) Context(cmd string) Context {
+	return Context{
+		Funcs:   run.Conf.Funcs,
+		Command: cmd,
+	}
 }
 
 func (run *SSHRunner) Run() error {
@@ -178,7 +186,12 @@ func (run *SSHRunner) Run() error {
 	}
 
 	for _, item := range run.Conf.Items {
-		out, err := executeRemoteCommand(item.Check, run.Addr, client)
+		cmd, err := renderString(cmdTmpl, run.Context(item.Check))
+		if err != nil {
+			return failed(fmt.Errorf("error rendering command (aborting)"))
+		}
+
+		out, err := executeRemoteCommand(cmd, run.Addr, client)
 		if err == nil {
 			run.res.Items = append(run.res.Items, ItemResult{
 				err:    err,
@@ -190,7 +203,12 @@ func (run *SSHRunner) Run() error {
 		}
 
 		if exitError, ok := err.(*ssh.ExitError); ok && exitError.ExitStatus() != 0 {
-			out, err := executeRemoteCommand(item.Action, run.Addr, client)
+			cmd, err := renderString(cmdTmpl, run.Context(item.Action))
+			if err != nil {
+				return failed(fmt.Errorf("error rendering command (aborting)"))
+			}
+
+			out, err := executeRemoteCommand(cmd, run.Addr, client)
 			if err == nil {
 				run.res.Items = append(run.res.Items, ItemResult{
 					err:    err,
@@ -244,6 +262,13 @@ func (run *LocalRunner) Result() *HostResult {
 	return run.res
 }
 
+func (run *LocalRunner) Context(cmd string) Context {
+	return Context{
+		Funcs:   run.Conf.Funcs,
+		Command: cmd,
+	}
+}
+
 func (run *LocalRunner) Run() error {
 	failed := func(err error) error {
 		run.res.err = err
@@ -274,7 +299,12 @@ func (run *LocalRunner) Run() error {
 	}
 
 	for _, item := range run.Conf.Items {
-		out, err := executeLocalCommand(item.Check)
+		cmd, err := renderString(cmdTmpl, run.Context(item.Check))
+		if err != nil {
+			return failed(fmt.Errorf("error rendering command (aborting)"))
+		}
+
+		out, err := executeLocalCommand(cmd)
 		if err == nil {
 			run.res.Items = append(run.res.Items, ItemResult{
 				err:    err,
@@ -286,7 +316,12 @@ func (run *LocalRunner) Run() error {
 		}
 
 		if exitError, ok := err.(*ssh.ExitError); ok && exitError.ExitStatus() != 0 {
-			out, err := executeLocalCommand(item.Action)
+			cmd, err := renderString(cmdTmpl, run.Context(item.Action))
+			if err != nil {
+				return failed(fmt.Errorf("error rendering command (aborting)"))
+			}
+
+			out, err := executeLocalCommand(cmd)
 			if err == nil {
 				run.res.Items = append(run.res.Items, ItemResult{
 					err:    err,

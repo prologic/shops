@@ -29,12 +29,14 @@ func (i Item) String() string {
 }
 
 type Files []File
+type Funcs map[string]string
 type Items []Item
 
 type Config struct {
 	Version string `yaml:"version"`
 
 	Files Files `yaml:"files"`
+	Funcs Funcs `yaml:"funcs"`
 	Items Items `yaml:"items"`
 }
 

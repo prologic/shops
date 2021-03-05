@@ -1,0 +1,12 @@
+---
+veersion: 1
+
+funcs:
+  hello: |
+    name="${1:-World}"
+    printf "Hello %s\n" "$name"
+
+items:
+  - name: Print "Hello World"
+    check: true
+    action: hello
