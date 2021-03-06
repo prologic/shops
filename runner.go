@@ -434,7 +434,7 @@ func (run *GroupRunner) Run() error {
 	}
 
 	if nErrors > 0 {
-		return fmt.Errorf("error: some %d/%d targerts failed", nErrors, run.URIs)
+		return fmt.Errorf("error: some %d/%d targerts failed", nErrors, len(run.URIs))
 	}
 
 	return nil
