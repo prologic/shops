@@ -188,7 +188,7 @@ func (run *SSHRunner) Run() error {
 	}
 
 	for _, item := range run.Conf.Items {
-		log.Debug("%s:", run.Addr)
+		log.Debugf("%s:", run.Addr)
 
 		cmd, err := renderString(cmdTmpl, run.Context(item.Check))
 		if err != nil {
