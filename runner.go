@@ -188,11 +188,14 @@ func (run *SSHRunner) Run() error {
 	}
 
 	for _, item := range run.Conf.Items {
+		log.Debug("%s:", run.Addr)
+
 		cmd, err := renderString(cmdTmpl, run.Context(item.Check))
 		if err != nil {
 			return failed(fmt.Errorf("error rendering command (aborting)"))
 		}
 
+		log.Debugf("cmd: %s", cmd)
 		out, err := executeRemoteCommand(cmd, run.Addr, client)
 		log.Debugf("out: %s", out)
 		log.Debugf("err: %#v", err)
@@ -212,6 +215,7 @@ func (run *SSHRunner) Run() error {
 				return failed(fmt.Errorf("error rendering command (aborting)"))
 			}
 
+			log.Debugf("cmd: %s", cmd)
 			out, err := executeRemoteCommand(cmd, run.Addr, client)
 			log.Debugf("out: %s", out)
 			log.Debugf("err: %#v", err)
@@ -305,14 +309,17 @@ func (run *LocalRunner) Run() error {
 	}
 
 	for _, item := range run.Conf.Items {
+		log.Debug("local://")
+
 		cmd, err := renderString(cmdTmpl, run.Context(item.Check))
 		if err != nil {
 			return failed(fmt.Errorf("error rendering command (aborting)"))
 		}
-		log.Debugf("%s executing:%s", run.res.Addr, cmd)
 
+		log.Debugf("cmd: %s", cmd)
 		out, err := executeLocalCommand(cmd)
-		log.Debugf("out: %#v err: %#v", out, err)
+		log.Debugf("out: %s", out)
+		log.Debugf("err: %#v", err)
 		if err == nil {
 			run.res.Items = append(run.res.Items, ItemResult{
 				err:    err,
@@ -328,9 +335,10 @@ func (run *LocalRunner) Run() error {
 			if err != nil {
 				return failed(fmt.Errorf("error rendering command (aborting)"))
 			}
-			log.Debugf("%s executing:%s", run.res.Addr, cmd)
 
+			log.Debugf("cmd: %s", cmd)
 			out, err := executeLocalCommand(cmd)
+			log.Debugf("out: %#v err: %#v", out, err)
 			if err == nil {
 				log.Debugf("output: #%v", out)
 				run.res.Items = append(run.res.Items, ItemResult{
