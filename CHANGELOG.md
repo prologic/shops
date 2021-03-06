@@ -1,4 +1,28 @@
 
+<a name="0.0.3"></a>
+## [0.0.3](https://github.com/prologic/shops/compare/0.0.2...0.0.3) (2021-03-06)
+
+### Bug Fixes
+
+* Fix SSHRunner to capture both stdout/stderr
+* Fix bad call to log.Debugf()
+* Fix bug with exitStatus.Error() and improve error hanadling when actions fail
+
+### Features
+
+* Add toc to README
+* Add example of ensuring and installing node_exporter on Linux hosts
+* Add additinoal debug logging until we iron out subtle bugs/issues
+* Add docs on authentication and reference [#9](https://github.com/prologic/shops/issues/9)
+* Add star button to README
+
+### Updates
+
+* Update README.md
+* Update README
+* Update README.md
+
+
 <a name="0.0.2"></a>
 ## [0.0.2](https://github.com/prologic/shops/compare/0.0.1...0.0.2) (2021-03-05)
 
@@ -19,6 +43,7 @@
 
 ### Updates
 
+* Update CHANGELOG for 0.0.2
 * Update README with latest demo example
 
 
