@@ -1,4 +1,13 @@
 
+<a name="0.0.4"></a>
+## [0.0.4](https://github.com/prologic/shops/compare/0.0.3...0.0.4) (2021-03-06)
+
+### Features
+
+* Add display of ascii poo on non-zero target errors and exit with exit status 3
+* Add uptime to testdata/ping.yml spec
+
+
 <a name="0.0.3"></a>
 ## [0.0.3](https://github.com/prologic/shops/compare/0.0.2...0.0.3) (2021-03-06)
 
@@ -18,6 +27,7 @@
 
 ### Updates
 
+* Update CHANGELOG for 0.0.3
 * Update README.md
 * Update README
 * Update README.md
