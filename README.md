@@ -116,6 +116,29 @@ $ ./shops -f ./testdata/sample.yml 10.0.0.50
 
 > Yes, it really does print a Pony on success! 🤣
 
+### Authentication
+
+Remote targets are operated on via the SSH protocol using the `ssh://` type
+which is implifed by default or if the target looks like it might be a hostname
+or host:port pair.
+
+Right now the only supported authentication methods are:
+
+- SSH Agent
+
+This means you **must** have a locally running `ssh-agent` and it **must**
+have the identities you intend ot use to operate on your remote targets.
+
+You can list these with `ssh-add -l`. If you do not have any listed this is
+likely the most common cause of "authentication failure" errors.
+
+There is an issue (#9) in the backlog to address adding support for other
+authentication mechanisms:
+
+- Password based auth with secure prompts
+- Key based auth by providing an identity file and securely prompting for
+  passphrase if applicable.
+
 ## Specification File Format
 
 The specification file format is a simple YAML file with the following
