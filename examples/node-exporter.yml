@@ -5,18 +5,29 @@
 version: 1
 
 funcs:
-  install_latest_node_exporter: |
-    set -ex
+  get_node_exporter_binary: |
+    if command -v node_exporter > /dev/null 2>&1; then
+      node_exporter="node_exporter"
+    else
+      node_exporter="/usr/local/bin/node_exporter"
+    fi
 
+    printf "%s" "${node_exporter}"
+  get_node_exporter_version: |
+    $(get_node_exporter_binary) --version 2>&1 | head -n 1 | cut -d ' ' -f 3
+  install_latest_node_exporter: |
     curl -qsSL https://api.github.com/repos/prometheus/node_exporter/releases/latest \
     | grep browser_download_url             \
     | grep linux.amd64                      \
     | cut -d '"' -f 4                       \
     | wget -q -O - -i -                     \
-    | tar -xv node_exporter-*/node_exporter \
-    && mv node_exporter-*/node_exporter /usr/local/bin/node_exporter
+    | tar -zx node_exporter-*/node_exporter \
+    && mv node_exporter-*/node_exporter /usr/local/bin/node_exporter \
+    && rm -rf node_exporter-*
 
 items:
-  - name: Ensure node-exporter is installed
+  - name: Ensure node_exporter is installed
     check: command -v node-exporter || test -x /usr/local/bin/node_exporter
     action: install_latest_node_exporter
+  - name: Check  version of node_exporter
+    check: get_node_exporter_version
