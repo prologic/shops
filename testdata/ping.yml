@@ -6,3 +6,6 @@ items:
     check: true
     action: |
       echo "$HOSTNAME dead or /bin/true not found"
+  - name: Check uptime and load
+    check: false
+    action: uptime
