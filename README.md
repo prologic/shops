@@ -116,6 +116,14 @@ $ ./shops -f ./testdata/sample.yml 10.0.0.50
 
 > Yes, it really does print a Pony on success! 🤣
 
+### Examples and Use Cases
+
+> Yes! This is a serious tool and effort to build something __I__ want to use on a daily basis to help automate various DevOps / System tasks
+> without having to go learn a complicated / non-trivial DSL of some description and all sorts of features I just don't need. Hopefully you find
+> this a useful tool to add to your toolbelt too! 🤗
+
+Please puruse the [Examples](/examples) where I will place real-live examples of various types of tasks over time. Mostly these are biaed towards my home infrastructure (_a little server room with a 22RU rack cabinet and server gear_). If you end up using `shops` in your infrastructure, even if it's just a Raspbeery Pi, feel free to submit PR(s) to add useful examples adn use-cases here too! 🙇‍♂️
+
 ### Authentication
 
 Remote targets are operated on via the SSH protocol using the `ssh://` type
