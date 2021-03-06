@@ -393,11 +393,12 @@ func NewGroupRunner(uris []URI, conf Config, opts ...Option) (*GroupRunner, erro
 	return &GroupRunner{URIs: uris, Conf: conf, Opts: *options}, nil
 }
 
-func (run *GroupRunner) Run() {
+func (run *GroupRunner) Run() error {
 	var wg sync.WaitGroup
 
 	results := make(chan *HostResult)
 
+	nErrors := 0
 	for _, u := range run.URIs {
 		var runner Runner
 
@@ -417,6 +418,7 @@ func (run *GroupRunner) Run() {
 
 			if err := runner.Run(); err != nil {
 				log.WithError(err).Error("error running host")
+				nErrors++
 			}
 			results <- runner.Result()
 		}(runner)
@@ -430,4 +432,10 @@ func (run *GroupRunner) Run() {
 	for res := range results {
 		fmt.Printf("%s\n", res)
 	}
+
+	if nErrors > 0 {
+		return fmt.Errorf("error: some %d/%d targerts failed", nErrors, run.URIs)
+	}
+
+	return nil
 }

@@ -96,7 +96,11 @@ func main() {
 		os.Exit(2)
 	}
 
-	runner.Run()
+	if err := runner.Run(); err != nil {
+		Poo()
+		os.Exit(3)
+	}
 
 	Pony()
+	os.Exit(0)
 }
