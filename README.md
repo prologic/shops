@@ -28,6 +28,21 @@ For local targets, only thee type is required, e.g: `local://`.
 For remote targets, the user and port are optional and if not specified in the
 target they default to the `-u/--user` and `-p/--port` flags respectively.
 
+Table of Contents
+=================
+
+* [shops \- SHell OPerationS](#shops---shell-operations)
+  * [Getting Started](#getting-started)
+    * [Install from releases](#install-from-releases)
+    * [Install from source](#install-from-source)
+  * [Usage](#usage)
+    * [Examples and Use Cases](#examples-and-use-cases)
+    * [Authentication](#authentication)
+  * [Specification File Format](#specification-file-format)
+  * [License](#license)
+
+Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
+
 ## Getting Started
 
 ### Install from releases
