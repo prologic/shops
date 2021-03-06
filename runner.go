@@ -102,16 +102,19 @@ func (res *HostResult) Ok() bool {
 func (res *HostResult) String() string {
 	var sb strings.Builder
 
-	sb.WriteString(fmt.Sprintf("%s:\n", res.Addr))
+	var status string
+
 	if res.Error() != nil {
-		sb.WriteString(fmt.Sprintf(" host failed: %s\n", res.Error()))
-	} else {
-		for _, file := range res.Files {
-			sb.WriteString(fmt.Sprintf(" %s\n", file.String()))
-		}
-		for _, item := range res.Items {
-			sb.WriteString(fmt.Sprintf(" %s\n", item.String()))
-		}
+		status = fmt.Sprintf(" host failed: %s", res.Error())
+	}
+
+	sb.WriteString(fmt.Sprintf("%s:%s\n", res.Addr, status))
+
+	for _, file := range res.Files {
+		sb.WriteString(fmt.Sprintf(" %s\n", file.String()))
+	}
+	for _, item := range res.Items {
+		sb.WriteString(fmt.Sprintf(" %s\n", item.String()))
 	}
 
 	return sb.String()
@@ -191,6 +194,8 @@ func (run *SSHRunner) Run() error {
 		}
 
 		out, err := executeRemoteCommand(cmd, run.Addr, client)
+		log.Debugf("out: %s", out)
+		log.Debugf("err: %#v", err)
 		if err == nil {
 			run.res.Items = append(run.res.Items, ItemResult{
 				err:    err,
@@ -208,6 +213,8 @@ func (run *SSHRunner) Run() error {
 			}
 
 			out, err := executeRemoteCommand(cmd, run.Addr, client)
+			log.Debugf("out: %s", out)
+			log.Debugf("err: %#v", err)
 			if err == nil {
 				run.res.Items = append(run.res.Items, ItemResult{
 					err:    err,
@@ -227,7 +234,7 @@ func (run *SSHRunner) Run() error {
 					Output: strings.TrimSpace(out),
 				})
 				if !run.Opts.ContinueOnError {
-					return failed(fmt.Errorf("error running item (aborting)"))
+					return failed(fmt.Errorf("error running item (aborting): %w", err))
 				}
 			}
 		} else {
@@ -344,7 +351,7 @@ func (run *LocalRunner) Run() error {
 					Output: strings.TrimSpace(out),
 				})
 				if !run.Opts.ContinueOnError {
-					return failed(fmt.Errorf("error running item (aborting)"))
+					return failed(fmt.Errorf("error running item (aborting): %w", err))
 				}
 			}
 		} else {
@@ -403,9 +410,8 @@ func (run *GroupRunner) Run() {
 
 			if err := runner.Run(); err != nil {
 				log.WithError(err).Error("error running host")
-			} else {
-				results <- runner.Result()
 			}
+			results <- runner.Result()
 		}(runner)
 	}
 

@@ -11,7 +11,10 @@ type exitStatus struct {
 }
 
 func (e exitStatus) Error() string {
-	return e.err.Error()
+	if e.err != nil {
+		return e.err.Error()
+	}
+	return ""
 }
 
 func (e exitStatus) ExitStatus() int {
