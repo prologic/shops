@@ -62,9 +62,13 @@ func (res *ItemResult) String() string {
 	var sb strings.Builder
 
 	if res.Ok() {
-		sb.WriteString(fmt.Sprintf(" %s ✅ -> %s", res.Name, res.Output))
+		if res.Output != "" {
+			sb.WriteString(fmt.Sprintf(" %s ✅ -> %s", res.Name, res.Output))
+		} else {
+			sb.WriteString(fmt.Sprintf(" %s ✅", res.Name))
+		}
 	} else {
-		sb.WriteString(fmt.Sprintf(" %s ❌ -> %s", res.Name, res.Output))
+		sb.WriteString(fmt.Sprintf(" %s ❌ (%s)", res.Name, res.Output))
 	}
 
 	return sb.String()
