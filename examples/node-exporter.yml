@@ -1,0 +1,22 @@
+# This shops spec is suitable for running against SystemD Linux hosts such as
+# Debian 10 or similar to install and ensure node-exporter from Prometheus is
+# deployed and running and is the latest version.
+---
+version: 1
+
+funcs:
+  install_latest_node_exporter: |
+    set -ex
+
+    curl -qsSL https://api.github.com/repos/prometheus/node_exporter/releases/latest \
+    | grep browser_download_url             \
+    | grep linux.amd64                      \
+    | cut -d '"' -f 4                       \
+    | wget -q -O - -i -                     \
+    | tar -xv node_exporter-*/node_exporter \
+    && mv node_exporter-*/node_exporter /usr/local/bin/node_exporter
+
+items:
+  - name: Ensure node-exporter is installed
+    check: command -v node-exporter || test -x /usr/local/bin/node_exporter
+    action: install_latest_node_exporter
