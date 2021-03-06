@@ -67,9 +67,10 @@ func executeRemoteCommand(command, hostaddr string, client *ssh.Client) (string,
 		}
 	}
 
-	var stdout bytes.Buffer
+	var buf bytes.Buffer
 
-	session.Stdout = &stdout
+	session.Stdout = &buf
+	session.Stderr = &buf
 
 	var exitError error
 
@@ -80,5 +81,5 @@ func executeRemoteCommand(command, hostaddr string, client *ssh.Client) (string,
 		}
 	}
 
-	return stdout.String(), exitError
+	return buf.String(), exitError
 }
