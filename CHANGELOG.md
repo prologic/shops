@@ -1,10 +1,22 @@
 
+<a name="0.0.6"></a>
+## [0.0.6](https://github.com/prologic/shops/compare/0.0.5...0.0.6) (2021-03-07)
+
+### Features
+
+* Add support for variables (environment variables) with overrides via -e/--env flag(s)
+
+
 <a name="0.0.5"></a>
 ## [0.0.5](https://github.com/prologic/shops/compare/0.0.4...0.0.5) (2021-03-06)
 
 ### Bug Fixes
 
 * Fix bug in error logging on non-zero target failures
+
+### Updates
+
+* Update CHANGELOG for 0.0.5
 
 
 <a name="0.0.4"></a>
