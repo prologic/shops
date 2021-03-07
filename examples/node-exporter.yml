@@ -4,6 +4,9 @@
 ---
 version: 1
 
+env:
+  BASE_URL: https://api.github.com/repos/prometheus/node_exporter
+
 funcs:
   get_node_exporter_binary: |
     if command -v node_exporter > /dev/null 2>&1; then
@@ -16,7 +19,7 @@ funcs:
   get_node_exporter_version: |
     $(get_node_exporter_binary) --version 2>&1 | head -n 1 | cut -d ' ' -f 3
   is_node_exporter_up_to_date: |
-    latest_version="$(curl -qsSL https://api.github.com/repos/prometheus/node_exporter/releases/latest | grep tag_name | cut -d '"' -f 4 | sed -e 's/v\(.*\)/\1/g')"
+    latest_version="$(curl -qsSL "${BASE_URL}/releases/latest" | grep tag_name | cut -d '"' -f 4 | sed -e 's/v\(.*\)/\1/g')"
     current_version="$(get_node_exporter_version)"
     if [ "${current_version}" -eq "${latest_version}" ]; then
       return 0
@@ -24,12 +27,12 @@ funcs:
       return 1
     fi
   install_latest_node_exporter: |
-    curl -qsSL https://api.github.com/repos/prometheus/node_exporter/releases/latest \
-    | grep browser_download_url             \
-    | grep linux.amd64                      \
-    | cut -d '"' -f 4                       \
-    | wget -q -O - -i -                     \
-    | tar -zx node_exporter-*/node_exporter \
+    curl -qsSL "${BASE_URL}/releases/latest"  \
+    | grep browser_download_url               \
+    | grep linux.amd64                        \
+    | cut -d '"' -f 4                         \
+    | wget -q -O - -i -                       \
+    | tar -zx node_exporter-*/node_exporter   \
     && mv node_exporter-*/node_exporter /usr/local/bin/node_exporter \
     && rm -rf node_exporter-*
 
