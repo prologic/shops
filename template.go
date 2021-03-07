@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"strings"
 	"text/template"
 )
 
@@ -21,7 +20,7 @@ export {{ range $env := . }}{{ $env.Key }} {{ end }}
 {{- with .Funcs }}
 {{ range $key, $val := . }}
 {{ $key }}() {
-{{ $val | trim | indent 2 }}
+{{ $val }}
 }
 {{- end }}
 {{- end }}
@@ -43,23 +42,8 @@ type Context struct {
 	Command string
 }
 
-func trim(v string) string {
-	return strings.TrimSpace(v)
-}
-
-func indent(spaces int, v string) string {
-	pad := strings.Repeat(" ", spaces)
-	return pad + strings.Replace(v, "\n", "\n"+pad, -1)
-}
-
 func renderString(tpl string, ctx Context) (string, error) {
-	funcMap := map[string]interface{}{
-		"indent": indent,
-		"trim":   trim,
-	}
-
 	t := template.New("tpl")
-	t.Funcs(funcMap)
 	template.Must(t.Parse(tpl))
 	buf := bytes.NewBuffer([]byte{})
 	err := t.Execute(buf, ctx)
