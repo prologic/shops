@@ -90,9 +90,14 @@ func readConfig(fn string) (conf Config, err error) {
 	conf.envMap = make(map[string]*Env)
 
 	for _, item := range conf.Env {
-		key, value := item.Key.(string), item.Value.(string)
-		conf.envMap[key] = &Env{Key: key, Value: value}
-		conf.envList = append(conf.envList, conf.envMap[key])
+		if key, ok := item.Key.(string); ok {
+			conf.envMap[key] = &Env{Key: key}
+			conf.envList = append(conf.envList, conf.envMap[key])
+
+			if value, ok := item.Value.(string); ok {
+				conf.envMap[key].Value = value
+			}
+		}
 	}
 
 	return
