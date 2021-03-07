@@ -1,0 +1,40 @@
+# This shops spec is suitable for running against hosts with a libc compatible
+# resolveer that manages a /etc/resolv.conf configuration file.
+# This spec ensures the desired resolver configuration.
+---
+version: 1
+
+env:
+  RESOLVCONF: /etc/resolv.conf
+  SEARCH:
+  NS1: 1.1.1.1
+  NS2: 4.4.4.4
+  NS3: 8.8.8.8
+
+funcs:
+  check_resolvconf: |
+    if [ -n "${SEARCH}" ] && ! grep -q "search ${SEARCH}" "${RESOLVCONF}"; then
+      return 1
+    fi
+    if [ -n "${NS1}" ] && ! grep -q "nameserver ${NS1}" "${RESOLVCONF}" ]; then
+      return 1
+    fi
+    if [ -n "${NS2}" ] && ! grep -q "nameserver ${NS2}" "${RESOLVCONF}"; then
+      return 1
+    fi
+    if [ -n "${NS3}" ] && ! grep -q "nameserver ${NS3}" "${RESOLVCONF}"; then
+      return 1
+    fi
+    return 0
+  fix_resolvconf: |
+    {
+      [ -n "${SEARCH}" ] && printf "search %s\n" "${SEARCH}"
+      [ -n "${NS1}" ] && printf "nameserver %s\n" "${NS1}"
+      [ -n "${NS2}" ] && printf "nameserver %s\n" "${NS2}"
+      [ -n "${NS3}" ] && printf "nameserver %s\n" "${NS3}"
+    } > "${RESOLVCONF}"
+
+items:
+  - name: Cheeck /etc/resolv.conf
+    check: check_resolvconf
+    action: fix_resolvconf
