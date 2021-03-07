@@ -5,30 +5,19 @@
 version: 1
 
 env:
+  PATH: /usr/local/bin:$PATH
   BASE_URL: https://api.github.com/repos/prometheus/node_exporter
 
 funcs:
-  get_node_exporter_binary: |
-    if command -v node_exporter > /dev/null 2>&1; then
-      node_exporter="node_exporter"
-    else
-      node_exporter="/usr/local/bin/node_exporter"
-    fi
-
-    printf "%s" "${node_exporter}"
-  get_node_exporter_version: |
-    $(get_node_exporter_binary) --version 2>&1 | head -n 1 | cut -d ' ' -f 3
+  get_current_version: |
+    node_exporter --version 2>&1 | head -n 1 | cut -d ' ' -f 3
   get_systemctl_status: |
     systemctl list-units --type=service | grep node_exporter | awk '{ print $2 " " $3 " " $4 }'
-  is_node_exporter_up_to_date: |
+  is_latest_version: |
     latest_version="$(curl -qsSL "${BASE_URL}/releases/latest" | grep tag_name | cut -d '"' -f 4 | sed -e 's/v\(.*\)/\1/g')"
-    current_version="$(get_node_exporter_version)"
-    if [ "${current_version}" -eq "${latest_version}" ]; then
-      return 0
-    else
-      return 1
-    fi
-  install_latest_node_exporter: |
+    current_version="$(get_current_version)"
+    [ "${current_version}" = "${latest_version}" ]
+  install_latest_version: |
     curl -qsSL "${BASE_URL}/releases/latest"  \
     | grep browser_download_url               \
     | grep linux.amd64                        \
@@ -59,7 +48,7 @@ funcs:
 items:
   - name: Ensure node_exporter is installed
     check: command -v node-exporter || test -x /usr/local/bin/node_exporter
-    action: install_latest_node_exporter
+    action: install_latest_version
   - name: Check SystemD unit is installed
     check: get_systemctl_status > /dev/null
     action: install_systemd_unit && enable_systemd_unit
@@ -69,8 +58,8 @@ items:
   - name: Check SystemD unit is running
     check: get_systemctl_status | grep -q running
     action: restart_systemd_unit
-  - name: Check version of node_exporter
-    check: get_node_exporter_version
-  - name: Ensure node_exporter is up-to-date
-    check: is_node_exporter_up_to_date
-    action: install_latest_node_exporter
+  - name: Check current version
+    check: get_current_version
+  - name: Ensure latest version installed
+    check: is_latest_version
+    action: install_latest_version
