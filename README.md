@@ -1,4 +1,4 @@
-# shops - SHell OPerationS
+# shops - Shell Operations
 
 ![GitHub All Releases](https://img.shields.io/github/downloads/prologic/shops/total)
 ![](https://github.com/prologic/shops/workflows/Go/badge.svg)
@@ -32,7 +32,7 @@ flags respectively.
 Table of Contents
 =================
 
-* [shops \- SHell OPerationS](#shops---shell-operations)
+* [shops \- Shell Operations](#shops---shell-operations)
   * [Getting Started](#getting-started)
     * [Install from releases](#install-from-releases)
     * [Install from source](#install-from-source)
@@ -139,9 +139,9 @@ shops -f ./testdata/sample.yml 10.0.0.50
 > Yes! This is a serious tool and effort to build something __I__ want to use on a daily basis to help automate various DevOps / System tasks
 > without having to go learn a complicated / non-trivial DSL of some description and all sorts of features I just don't need.
 > Most of the time I just want to write shell scripts or run shell snippets against machines!
-> Hopefully you find this a useful tool to add to your toolbelt too! 🤗
+> Hopefully you find this a useful tool to add to your tool-belt too! 🤗
 
-Please puruse the [Examples](/examples) where I (_and hopefully others_) will place real-life examples of various types of tasks over time. Mostly these are biaed towards my home infrastructure (_a little server room with a 22RU rack cabinet and server gear_). If you end up using `shops` in your infrastructure, even if it's just a Raspbeery Pi, feel free to submit PR(s) to add useful examples adn use-cases here too! 🙇‍
+Please peruse the [Examples](/examples) where I (_and hopefully others_) will place real-life examples of various types of tasks over time. Mostly these are biased towards my home infrastructure (_a little server room with a 22RU rack cabinet and server gear_). If you end up using `shops` in your infrastructure, even if it's just a Raspberry Pi, feel free to submit PR(s) to add useful examples and use-cases here too! 🙇‍
 
 ### Authentication
 
@@ -162,8 +162,8 @@ likely the most common cause of "authentication failure" errors.
 There is an issue (#9) in the backlog to address adding support for other
 authentication mechanisms such as:
 
-- Password based auth with secure prompts
-- Key based auth by providing an identity file and securely prompting for
+- Password based authentication with secure prompts
+- Key based authentication by providing an identity file and securely prompting for
   passphrase if applicable.
 
 ## Specification File Format
