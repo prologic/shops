@@ -190,6 +190,12 @@ A valid spec consists of a number of top-level keys:
 - `version` -- Which for the moment is ignored, but _might_ be used to version
                the configuration file for future enhancements in a backwards
                compatible way.
+- `env`     -- Environment variables defined as a map of keys and values
+               (_order is preserved_) and shell interpolation  is supported.
+               Shell interpolation occurs on the target(s), not locally.
+               Variables can be overridden with the `-e/--env` flag with the
+               form `KEY[=<value>]`. If value is ommitted the value is taken
+               from the local environment where `shops` is run.
 - `files`   -- Declares one or more files or directories to be copied to each
                target host. Directories are copied recursively. Currently no
                checks are performed, but this is planned.

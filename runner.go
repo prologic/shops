@@ -109,10 +109,12 @@ func (res *HostResult) String() string {
 	var status string
 
 	if res.Error() != nil {
-		status = fmt.Sprintf(" host failed: %s", res.Error())
+		status = fmt.Sprintf(" ❌ (host failed: %s)", res.Error())
+	} else {
+		status = " ✅"
 	}
 
-	sb.WriteString(fmt.Sprintf("%s:%s\n", res.Addr, status))
+	sb.WriteString(fmt.Sprintf("%s%s\n", res.Addr, status))
 
 	for _, file := range res.Files {
 		sb.WriteString(fmt.Sprintf(" %s\n", file.String()))
@@ -126,34 +128,44 @@ func (res *HostResult) String() string {
 
 type Runner interface {
 	Run() error
-	Context(cmd string) Context
 	Result() *HostResult
 }
 
-type SSHRunner struct {
-	Addr string
-	Conf Config
-	User string
-	Opts Options
-
+type BaseRunner struct {
 	res *HostResult
+
+	Conf Config
+	Opts Options
 }
 
-func NewSSHRunner(addr string, conf Config, user string, opts Options) *SSHRunner {
-	runner := &SSHRunner{Addr: addr, Conf: conf, User: user, Opts: opts}
-	runner.res = &HostResult{Addr: addr}
-	return runner
+func NewBaseRunner(conf Config, opts Options) *BaseRunner {
+	return &BaseRunner{res: &HostResult{}, Conf: conf, Opts: opts}
 }
 
-func (run *SSHRunner) Result() *HostResult {
+func (run *BaseRunner) Result() *HostResult {
 	return run.res
 }
 
-func (run *SSHRunner) Context(cmd string) Context {
-	return Context{
-		Funcs:   run.Conf.Funcs,
-		Command: cmd,
+func (run *BaseRunner) Context(cmd string) Context {
+	return run.Conf.Context(cmd)
+}
+
+type SSHRunner struct {
+	*BaseRunner
+
+	Addr string
+	User string
+}
+
+func NewSSHRunner(addr string, conf Config, user string, opts Options) *SSHRunner {
+	runner := &SSHRunner{
+		BaseRunner: NewBaseRunner(conf, opts),
+
+		Addr: addr,
+		User: user,
 	}
+	runner.res.Addr = addr
+	return runner
 }
 
 func (run *SSHRunner) Run() error {
@@ -194,7 +206,8 @@ func (run *SSHRunner) Run() error {
 	for _, item := range run.Conf.Items {
 		cmd, err := renderString(cmdTmpl, run.Context(item.Check))
 		if err != nil {
-			return failed(fmt.Errorf("error rendering command (aborting)"))
+			log.WithError(err).Error("error rendering command")
+			return failed(fmt.Errorf("error rendering command (aborting): %s", err))
 		}
 
 		log.WithField("target", run.Addr).Debugf("cmd: %s", cmd)
@@ -214,7 +227,8 @@ func (run *SSHRunner) Run() error {
 		if err.(ExitError).ExitStatus() != 0 {
 			cmd, err := renderString(cmdTmpl, run.Context(item.Action))
 			if err != nil {
-				return failed(fmt.Errorf("error rendering command (aborting)"))
+				log.WithError(err).Error("error rendering command")
+				return failed(fmt.Errorf("error rendering command (aborting): %s", err))
 			}
 
 			log.WithField("target", run.Addr).Debugf("cmd: %s", cmd)
@@ -258,27 +272,15 @@ func (run *SSHRunner) Run() error {
 }
 
 type LocalRunner struct {
-	Conf Config
-	Opts Options
-
-	res *HostResult
+	*BaseRunner
 }
 
 func NewLocalRunner(conf Config, opts Options) *LocalRunner {
-	runner := &LocalRunner{Conf: conf, Opts: opts}
-	runner.res = &HostResult{Addr: "local://"}
-	return runner
-}
-
-func (run *LocalRunner) Result() *HostResult {
-	return run.res
-}
-
-func (run *LocalRunner) Context(cmd string) Context {
-	return Context{
-		Funcs:   run.Conf.Funcs,
-		Command: cmd,
+	runner := &LocalRunner{
+		BaseRunner: NewBaseRunner(conf, opts),
 	}
+	runner.res.Addr = "local://"
+	return runner
 }
 
 func (run *LocalRunner) Run() error {
@@ -313,7 +315,8 @@ func (run *LocalRunner) Run() error {
 	for _, item := range run.Conf.Items {
 		cmd, err := renderString(cmdTmpl, run.Context(item.Check))
 		if err != nil {
-			return failed(fmt.Errorf("error rendering command (aborting)"))
+			log.WithError(err).Error("error rendering command")
+			return failed(fmt.Errorf("error rendering command (aborting): %s", err))
 		}
 
 		log.WithField("target", "local://").Debugf("cmd: %s", cmd)
@@ -333,7 +336,8 @@ func (run *LocalRunner) Run() error {
 		if err.(ExitError).ExitStatus() != 0 {
 			cmd, err := renderString(cmdTmpl, run.Context(item.Action))
 			if err != nil {
-				return failed(fmt.Errorf("error rendering command (aborting)"))
+				log.WithError(err).Error("error rendering command")
+				return failed(fmt.Errorf("error rendering command (aborting): %s", err))
 			}
 
 			log.WithField("target", "local://").Debugf("cmd: %s", cmd)

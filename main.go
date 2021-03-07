@@ -17,6 +17,7 @@ var (
 	file string
 	user string
 	port int
+	env  []string
 )
 
 const helpText = `
@@ -49,6 +50,7 @@ func init() {
 	flag.StringVarP(&user, "user", "u", "root", "default user for temotee targets")
 	flag.IntVarP(&port, "port", "p", 22, "default port for remote targets")
 	flag.BoolVarP(&cont, "continue-on-error", "c", false, "continue on errors")
+	flag.StringSliceVarP(&env, "env", "e", []string{}, "set environment variables")
 }
 
 func main() {
@@ -76,6 +78,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "error reading config %s: %s", file, err)
 		os.Exit(2)
 	}
+	config.SetEnvVars(env)
 
 	var uris []URI
 

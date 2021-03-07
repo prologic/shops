@@ -1,0 +1,14 @@
+---
+veersion: 1
+
+env:
+  FOO: bar
+  BAR: ${FOO}
+
+items:
+  - name: Print value of $FOO
+    check: false
+    action: echo ${FOO}
+  - name: Print value of $BAR
+    check: false
+    action: echo ${BAR}
