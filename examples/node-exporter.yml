@@ -18,6 +18,8 @@ funcs:
     printf "%s" "${node_exporter}"
   get_node_exporter_version: |
     $(get_node_exporter_binary) --version 2>&1 | head -n 1 | cut -d ' ' -f 3
+  get_systemctl_status: |
+    systemctl list-units --type=service | grep node_exporter | awk '{ print $2 " " $3 " " $4 }'
   is_node_exporter_up_to_date: |
     latest_version="$(curl -qsSL "${BASE_URL}/releases/latest" | grep tag_name | cut -d '"' -f 4 | sed -e 's/v\(.*\)/\1/g')"
     current_version="$(get_node_exporter_version)"
@@ -32,16 +34,43 @@ funcs:
     | grep linux.amd64                        \
     | cut -d '"' -f 4                         \
     | wget -q -O - -i -                       \
-    | tar -zx node_exporter-*/node_exporter   \
+    | tar -zx                                 \
     && mv node_exporter-*/node_exporter /usr/local/bin/node_exporter \
     && rm -rf node_exporter-*
+  install_systemd_unit: |
+    cat > /etc/systemd/system/node_exporter.service <<EOF
+    [Unit]
+    Description=Node Exporter
+
+    [Service]
+    User=node_exporter
+    EnvironmentFile=/etc/sysconfig/node_exporter
+    ExecStart=/usr/local/bin/node_exporter $OPTIONS
+    Restart=on-failure
+
+    [Install]
+    WantedBy=default.target
+    EOF
+  enable_systemd_unit: |
+    systemctl enable node_exporter
+  restart_systemd_unit: |
+    systemctl restart node_exporter
 
 items:
   - name: Ensure node_exporter is installed
     check: command -v node-exporter || test -x /usr/local/bin/node_exporter
     action: install_latest_node_exporter
+  - name: Check SystemD unit is installed
+    check: get_systemctl_status > /dev/null
+    action: install_systemd_unit && enable_systemd_unit
+  - name: Check SystemD unit is active
+    check: get_systemctl_status | grep -q active
+    action: enable_systemd_unit
+  - name: Check SystemD unit is running
+    check: get_systemctl_status | grep -q running
+    action: restart_systemd_unit
   - name: Check version of node_exporter
     check: get_node_exporter_version
   - name: Ensure node_exporter is up-to-date
     check: is_node_exporter_up_to_date
-    action: false
+    action: install_latest_node_exporter
