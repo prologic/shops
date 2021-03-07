@@ -34,8 +34,9 @@ Table of Contents
 
 * [shops \- Shell Operations](#shops---shell-operations)
   * [Getting Started](#getting-started)
-    * [Install from releases](#install-from-releases)
-    * [Install from source](#install-from-source)
+    * [Install from Releases](#install-from-releases)
+    * [Install from Homebrew](#install-from-homebrew)
+    * [Install from Source](#install-from-source)
   * [Usage](#usage)
     * [Examples and Use Cases](#examples-and-use-cases)
     * [Authentication](#authentication)
@@ -46,7 +47,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 
 ## Getting Started
 
-### Install from releases
+### Install from Releases
 
 You can install `shops` by simply downloading the latest version from the
 [Release](https://github.com/prologic/shops/releases) page for your platform
@@ -67,7 +68,16 @@ For MacOS x86_64:
 curl -s https://api.github.com/repos/prologic/shops/releases/latest | grep browser_download_url | grep Darwin_x86_64 | cut -d '"' -f 4 | wget -q -O - -i - | tar -xv shops && mv shops /usr/local/bin/shops
 ```
 
-### Install from source
+### Install from Homebrew
+
+On MacOS you can install `shops` using [Homebrew](https://brew.sh):
+
+```#!console
+brew tap prologic/shops
+brew install shops
+```
+
+### Install from Source
 
 To install `shops` from source you can run `go get` directly if you have a [Go](https://golang.org) environment setup:
 
