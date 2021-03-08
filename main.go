@@ -93,7 +93,10 @@ func main() {
 		uris = ParseURIs(flag.Args(), user, strconv.Itoa(port))
 	}
 
-	runner, err := NewGroupRunner(uris, config)
+	runner, err := NewGroupRunner(
+		uris, config,
+		WithContinueOnError(cont),
+	)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error creating runner: %s", err)
 		os.Exit(2)

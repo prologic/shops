@@ -12,9 +12,9 @@ func NewOptions() *Options {
 
 type Option func(opts *Options) error
 
-func WithContinueOnError() Option {
+func WithContinueOnError(conf bool) Option {
 	return func(opts *Options) error {
-		opts.ContinueOnError = true
+		opts.ContinueOnError = cont
 		return nil
 	}
 }
