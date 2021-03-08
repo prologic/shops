@@ -20,7 +20,7 @@ export {{ range $env := . }}{{ $env.Key }} {{ end }}
 {{- with .Funcs }}
 {{ range $key, $val := . }}
 {{ $key }}() {
-{{ $val -}}
+{{ $val }}
 }
 {{- end }}
 {{- end }}
