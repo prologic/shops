@@ -1,0 +1,68 @@
+# Example of some Chef InSpec profiles ported to shops
+# See: https://github.com/prologic/shops
+---
+version: 1
+
+funcs:
+  is_file: file_exists "$1"
+  owned_by_user: |
+    uid="$(id -u "$1")"
+    test -O "${uid}"
+  owned_by_group: |
+    gid="$(id -g "$1")"
+    test -G "${gid}"
+  is_executable: test -x "$1"
+  has_permission: |
+    perm=$(stat -c '%a' "$1")
+    [ $((0$perm & 0$2)) -ne 0 ]
+  owner_writeable: |
+    has_permission "$1" 0200
+  group_writeable: |
+    has_permission "$1" 0020
+  other_writeable: |
+    has_permission "$1" 0002
+  owner_readable: |
+    has_permission "$1" 0400
+  group_readable: |
+    has_permission "$1" 0040
+  other_readable: |
+    has_permission "$1" 0004
+
+items:
+  - name: Trusted hosts login
+    check: ! is_file /etc/hosts.equiv
+    action: rm /etc/hosts.equiv
+  - name: Check /etc/shadow
+    check: is_file /etc/shadow
+    action: touch /etc/shadow
+
+  - name: /etc/passwd should exist
+    check: is_file /etc/passwd
+    action: touch /etc/passwd
+  - name: /etc/passwd should be owned by the root user
+    check: owned_by_user /etc/passwd root
+    action: chown /etc/passwd root
+  - name: /etc/passwd should be owned by the root group
+    check: owned_by_group /etc/passwd root
+    action: chgrp /etc/passwd root
+  - name: /etc/passwd should not be executable
+    check: ! is_executable
+    action: chmod u-x,g-x,o-x /etc/passwd
+  - name: /etc/passwd should be writeable by its owner
+    check: owner_writeable /etc/passwrd
+    action: chmod u+w /etc/passwd
+  - name: /etc/passwd should not be writeable by group members
+    check: ! group_writeable /etc/passwrd
+    action: chmod g-w /etc/passwd
+  - name: /etc/passwd should not be writeable by others
+    check: ! other_writeable /etc/passwrd
+    action: chmod o-w /etc/passwd
+  - name: /etc/passwd should be readable by its owner
+    check: owner_readable /etc/passwrd
+    action: chmod u+r /etc/passwd
+  - name: /etc/passwd should be readable by group members
+    check: group_readable /etc/passwrd
+    action: chmod g+r /etc/passwd
+  - name: /etc/passwd should be readable by others
+    check: other_readable /etc/passwrd
+    action: chmod o+r /etc/passwd
