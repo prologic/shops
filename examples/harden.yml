@@ -4,7 +4,7 @@
 version: 1
 
 funcs:
-  is_file: file_exists "$1"
+  is_file: test -f "$1"
   owned_by_user: |
     uid="$(id -u "$1")"
     test -O "${uid}"
@@ -31,7 +31,7 @@ funcs:
 items:
   - name: Trusted hosts login
     check: ! is_file /etc/hosts.equiv
-    action: rm /etc/hosts.equiv
+    action: rm -f /etc/hosts.equiv
   - name: Check /etc/shadow
     check: is_file /etc/shadow
     action: touch /etc/shadow
@@ -41,10 +41,10 @@ items:
     action: touch /etc/passwd
   - name: /etc/passwd should be owned by the root user
     check: owned_by_user /etc/passwd root
-    action: chown /etc/passwd root
+    action: chown root /etc/passwd
   - name: /etc/passwd should be owned by the root group
     check: owned_by_group /etc/passwd root
-    action: chgrp /etc/passwd root
+    action: chgrp root /etc/passwd
   - name: /etc/passwd should not be executable
     check: ! is_executable
     action: chmod u-x,g-x,o-x /etc/passwd
