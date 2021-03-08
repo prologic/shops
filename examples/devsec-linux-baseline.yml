@@ -1,5 +1,5 @@
-# Example of some Chef InSpec profiles ported to shops
-# See: https://github.com/prologic/shops
+# DevSev Linux Security Baseline
+# See: https://dev-sec.io/baselines/linux/
 ---
 version: 1
 
@@ -29,40 +29,53 @@ funcs:
     has_permission "$1" 0004
 
 items:
-  - name: Trusted hosts login
+  - name: [cs-01] Trusted hosts login
     check: ! is_file /etc/hosts.equiv
     action: rm -f /etc/hosts.equiv
-  - name: Check /etc/shadow
+
+  - name: [cs-02] /etc/shadow should exist
     check: is_file /etc/shadow
     action: touch /etc/shadow
+  - name: [cs-02] /etc/shadow should be owned by the root user
+    check: owned_by_user /etc/shadow root
+    action: chown root /etc/shadow
+  - name: [cs-02] /etc/shadow should be owned by the shadow group
+    check: owned_by_group /etc/shadow shadow
+    action: chgrp shadow /etc/shadow
+  - name: [cs-02] /etc/shadow should not be executable
+    check: ! is_executable /etc/shadow
+    action: chmod -x /etc/shadow
+  - name: [cs-02] /etc/shadow should not be readable by others
+    check: ! other_readable /etc/shadow
+    action: chmod o-r /etc/shadow
 
-  - name: /etc/passwd should exist
+  - name: [cs-03] /etc/passwd should exist
     check: is_file /etc/passwd
     action: touch /etc/passwd
-  - name: /etc/passwd should be owned by the root user
+  - name: [cs-03] /etc/passwd should be owned by the root user
     check: owned_by_user /etc/passwd root
     action: chown root /etc/passwd
-  - name: /etc/passwd should be owned by the root group
+  - name: [cs-03] /etc/passwd should be owned by the root group
     check: owned_by_group /etc/passwd root
     action: chgrp root /etc/passwd
-  - name: /etc/passwd should not be executable
+  - name: [cs-03] /etc/passwd should not be executable
     check: ! is_executable
     action: chmod u-x,g-x,o-x /etc/passwd
-  - name: /etc/passwd should be writeable by its owner
+  - name: [cs-03] /etc/passwd should be writeable by its owner
     check: owner_writeable /etc/passwrd
     action: chmod u+w /etc/passwd
-  - name: /etc/passwd should not be writeable by group members
+  - name: [cs-03] /etc/passwd should not be writeable by group members
     check: ! group_writeable /etc/passwrd
     action: chmod g-w /etc/passwd
-  - name: /etc/passwd should not be writeable by others
+  - name: [cs-03] /etc/passwd should not be writeable by others
     check: ! other_writeable /etc/passwrd
     action: chmod o-w /etc/passwd
-  - name: /etc/passwd should be readable by its owner
+  - name: [cs-03] /etc/passwd should be readable by its owner
     check: owner_readable /etc/passwrd
     action: chmod u+r /etc/passwd
-  - name: /etc/passwd should be readable by group members
+  - name: [cs-03] /etc/passwd should be readable by group members
     check: group_readable /etc/passwrd
     action: chmod g+r /etc/passwd
-  - name: /etc/passwd should be readable by others
+  - name: [cs-03] /etc/passwd should be readable by others
     check: other_readable /etc/passwrd
     action: chmod o+r /etc/passwd
