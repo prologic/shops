@@ -1,10 +1,33 @@
 
+<a name="0.0.7"></a>
+## [0.0.7](https://github.com/prologic/shops/compare/0.0.6...0.0.7) (2021-03-08)
+
+### Bug Fixes
+
+* Fix versioning of binaries in releases
+* Fix trailing newline in functions
+* Fix a potential panic when parsing null values for env keys in specs
+* Fix bug with here-doc (indent messing up syntax)
+* Fix other spelling errors
+
+### Updates
+
+* Update and rename harden.yml to devsec-linux-baseline.yml
+* Update harden.yml
+* Update README.md
+* Update README.md
+
+
 <a name="0.0.6"></a>
 ## [0.0.6](https://github.com/prologic/shops/compare/0.0.5...0.0.6) (2021-03-07)
 
 ### Features
 
 * Add support for variables (environment variables) with overrides via -e/--env flag(s)
+
+### Updates
+
+* Update CHANGELOG for 0.0.6
 
 
 <a name="0.0.5"></a>
